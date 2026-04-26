@@ -13,13 +13,27 @@ body {
   font-family: 'Poppins', sans-serif;
   background:#000;
   color:#fff;
+  overflow-x: hidden;
 }
 
-/* Stylish Neon Header */
+/* Header & Menu Icon */
+.top-bar {
+  display: flex;
+  align-items: center;
+  padding: 10px 20px;
+  position: relative;
+}
+
+.menu-icon {
+  font-size: 30px;
+  cursor: pointer;
+  z-index: 1001;
+}
+
 .header-title {
-  padding: 20px 10px;
+  flex-grow: 1;
   font-family: 'Monoton', cursive;
-  font-size: 40px;
+  font-size: 35px;
   text-align: center;
   margin: 0;
   text-transform: uppercase;
@@ -27,6 +41,45 @@ body {
 .header-title span.h { color: #ffffff; text-shadow: 0 0 10px #fff; } 
 .header-title span.m { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
 
+/* Side Navigation Drawer */
+.sidebar {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  background-color: #111;
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 80px;
+  border-right: 1px solid #ff0000;
+}
+
+.sidebar a {
+  padding: 15px 25px;
+  text-decoration: none;
+  font-size: 18px;
+  color: #fff;
+  display: block;
+  transition: 0.3s;
+  border-bottom: 1px solid #222;
+}
+
+.sidebar a:hover {
+  background: #ff0000;
+  color: white;
+}
+
+.sidebar .close-btn {
+  position: absolute;
+  top: 20px;
+  right: 25px;
+  font-size: 36px;
+  cursor: pointer;
+}
+
+/* Main Content Styles */
 .search {
   width:85%;
   margin:10px auto;
@@ -37,34 +90,6 @@ body {
   background: #111;
   color: #fff;
   outline: none;
-  font-size: 16px;
-}
-
-/* Category Buttons */
-.categories {
-  display: flex;
-  overflow-x: auto;
-  padding: 10px;
-  gap: 10px;
-  scrollbar-width: none;
-}
-.categories::-webkit-scrollbar { display: none; }
-
-.cat-btn {
-  background: #111;
-  color: #fff;
-  border: 1px solid #333;
-  padding: 8px 18px;
-  border-radius: 20px;
-  white-space: nowrap;
-  cursor: pointer;
-  font-size: 13px;
-  transition: 0.3s;
-}
-.cat-btn.active {
-  background: #ffffff;
-  color: #000;
-  font-weight: bold;
 }
 
 .grid {
@@ -83,19 +108,8 @@ body {
   flex-direction: column;
 }
 
-.movie img {
-  width:100%;
-  cursor: pointer;
-}
-
-.movie h3 {
-  padding:8px;
-  font-size:13px;
-  margin: 0;
-  flex-grow: 1;
-  text-align: center;
-  font-weight: 400;
-}
+.movie img { width:100%; cursor: pointer; }
+.movie h3 { padding:8px; font-size:13px; margin: 0; text-align: center; flex-grow: 1; }
 
 .download-btn {
   background: #ff0000;
@@ -107,50 +121,45 @@ body {
   font-size: 11px;
 }
 
-/* Load More Button */
-.load-more-container {
-  text-align: center;
-  padding: 20px;
-}
+.load-more-container { text-align: center; padding: 20px; }
 .load-more-btn {
   background: transparent;
   color: #fff;
   border: 2px solid #ff0000;
   padding: 10px 30px;
   border-radius: 25px;
-  font-weight: bold;
   cursor: pointer;
-  transition: 0.3s;
-}
-.load-more-btn:hover {
-  background: #ff0000;
 }
 </style>
 
 </head>
 <body>
 
-<h1 class="header-title"><span class="h">H.</span><span class="m">MOVIES</span></h1>
+<div id="mySidebar" class="sidebar">
+  <span class="close-btn" onclick="closeNav()">&times;</span>
+  <a href="#" onclick="loadMovies('trending'); closeNav()">🔥 Trending</a>
+  <a href="#" onclick="loadByCategory(16); closeNav()">Anime</a>
+  <a href="#" onclick="loadByCategory(28); closeNav()">Action</a>
+  <a href="#" onclick="loadByCategory(35); closeNav()">Comedy</a>
+  <a href="#" onclick="loadByCategory(27); closeNav()">Horror</a>
+  <a href="#" onclick="loadByCategory(18); closeNav()">Drama</a>
+  <a href="#" onclick="loadByCategory(878); closeNav()">Sci-Fi</a>
+</div>
+
+<div class="top-bar">
+  <div class="menu-icon" onclick="openNav()">&#9776;</div>
+  <h1 class="header-title"><span class="h">H.</span><span class="m">MOVIES</span></h1>
+</div>
 
 <input class="search" placeholder="Search movies..." id="search">
-
-<div class="categories">
-  <button class="cat-btn active" id="btn-trending" onclick="loadMovies('trending', this)">🔥 Trending</button>
-  <button class="cat-btn" onclick="loadByCategory(16, this)">Anime</button>
-  <button class="cat-btn" onclick="loadByCategory(28, this)">Action</button>
-  <button class="cat-btn" onclick="loadByCategory(35, this)">Comedy</button>
-  <button class="cat-btn" onclick="loadByCategory(27, this)">Horror</button>
-  <button class="cat-btn" onclick="loadByCategory(18, this)">Drama</button>
-</div>
 
 <div class="grid" id="movies"></div>
 
 <div class="load-more-container">
-  <button class="load-more-btn" id="loadMore" onclick="loadMoreMovies()">LOAD MORE</button>
+  <button class="load-more-btn" onclick="loadMoreMovies()">LOAD MORE</button>
 </div>
 
 <script>
-
 const API_KEY = "f409489a42d61f514484fa959f76fec7";
 const IMG = "https://image.tmdb.org/t/p/w500";
 const moviesDiv = document.getElementById("movies");
@@ -160,24 +169,20 @@ let currentPage = 1;
 let currentGenre = null;
 let isSearch = false;
 
+// Sidebar Controls
+function openNav() { document.getElementById("mySidebar").style.width = "250px"; }
+function closeNav() { document.getElementById("mySidebar").style.width = "0"; }
+
 // Initial Load
 loadMovies('trending');
 
-function loadMovies(type, btn) {
-  currentPage = 1;
-  currentGenre = null;
-  isSearch = false;
-  if(btn) updateActiveBtn(btn);
-  
+function loadMovies(type) {
+  currentPage = 1; currentGenre = null; isSearch = false;
   fetchMovies(`https://api.themoviedb.org/3/trending/movie/day?api_key=${API_KEY}&page=${currentPage}`, true);
 }
 
-function loadByCategory(genreId, btn) {
-  currentPage = 1;
-  currentGenre = genreId;
-  isSearch = false;
-  updateActiveBtn(btn);
-
+function loadByCategory(genreId) {
+  currentPage = 1; currentGenre = genreId; isSearch = false;
   fetchMovies(`https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&page=${currentPage}`, true);
 }
 
@@ -186,18 +191,12 @@ function loadMoreMovies() {
   let url = currentGenre 
     ? `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&with_genres=${currentGenre}&page=${currentPage}`
     : `https://api.themoviedb.org/3/trending/movie/day?api_key=${API_KEY}&page=${currentPage}`;
-    
-  if(isSearch) {
-    url = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${searchInput.value}&page=${currentPage}`;
-  }
-
+  if(isSearch) url = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${searchInput.value}&page=${currentPage}`;
   fetchMovies(url, false);
 }
 
 function fetchMovies(url, clearGrid) {
-  fetch(url)
-  .then(res => res.json())
-  .then(data => {
+  fetch(url).then(res => res.json()).then(data => {
     if(clearGrid) moviesDiv.innerHTML = "";
     showMovies(data.results);
   });
@@ -208,7 +207,6 @@ function showMovies(movies){
     if(!movie.poster_path) return;
     const div = document.createElement("div");
     div.classList.add("movie");
-
     div.innerHTML = `
       <img src="${IMG + movie.poster_path}" onclick="openMovie(${movie.id})">
       <h3>${movie.title}</h3>
@@ -218,25 +216,17 @@ function showMovies(movies){
   });
 }
 
-function updateActiveBtn(btn) {
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-}
-
-// Search
 searchInput.addEventListener("keyup", () => {
   let q = searchInput.value;
   if(q.length > 2) {
-    isSearch = true;
-    currentPage = 1;
+    isSearch = true; currentPage = 1;
     fetchMovies(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${q}&page=${currentPage}`, true);
   }
 });
 
 function openMovie(id){
   fetch(`https://api.themoviedb.org/3/movie/${id}/videos?api_key=${API_KEY}`)
-  .then(res => res.json())
-  .then(data => {
+  .then(res => res.json()).then(data => {
     let vid = data.results.find(v => v.type === "Trailer");
     if(vid) window.open(`https://www.youtube.com/watch?v=${vid.key}`);
     else alert("Trailer not available");
@@ -245,10 +235,8 @@ function openMovie(id){
 
 function goToDownload(title) {
   const query = encodeURIComponent(title);
-  const targetUrl = `https://new7.hdhub4u.fo/?s=${query}`;
-  window.open(targetUrl, '_blank');
+  window.open(`https://new7.hdhub4u.fo/?s=${query}`, '_blank');
 }
-
 </script>
 
 </body>
