@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>H.MOVIES PRO</title>
+
+<!-- Adsense (baad me apna ID dalna) -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXX"
+crossorigin="anonymous"></script>
+
+<style>
+body {
+  margin:0;
+  font-family:Arial;
+  background:#000;
+  color:#fff;
+}
+
+h1 {
+  padding:15px;
+}
+
+.search {
+  width:90%;
+  margin:10px;
+  padding:10px;
+  border-radius:10px;
+  border:none;
+}
+
+.grid {
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+  padding:10px;
+}
+
+.movie {
+  background:#111;
+  border-radius:10px;
+  overflow:hidden;
+  cursor:pointer;
+}
+
+.movie img {
+  width:100%;
+}
+
+.movie h3 {
+  padding:5px;
+  font-size:14px;
+}
+</style>
+
+</head>
+<body>
+
+<h1>H.MOVIES PRO</h1>
+
+<input class="search" placeholder="Search movies..." id="search">
+
+<h2 style="padding:10px;">🔥 Trending</h2>
+
+<div class="grid" id="movies"></div>
+
+<script>
+
+const API_KEY = "f409489a42d61f514484fa959f76fec7";
+
+const IMG = "https://image.tmdb.org/t/p/w500";
+
+const moviesDiv = document.getElementById("movies");
+
+const searchInput = document.getElementById("search");
+
+// 🔥 Trending Load
+fetch(`https://api.themoviedb.org/3/trending/movie/day?api_key=${API_KEY}`)
+.then(res => res.json())
+.then(data => showMovies(data.results));
+
+function showMovies(movies){
+  moviesDiv.innerHTML = "";
+  movies.forEach(movie => {
+    const div = document.createElement("div");
+    div.classList.add("movie");
+
+    div.innerHTML = `
+      <img src="${IMG + movie.poster_path}">
+      <h3>${movie.title}</h3>
+    `;
+
+    div.onclick = () => openMovie(movie.id);
+
+    moviesDiv.appendChild(div);
+  });
+}
+
+// 🔍 Search
+searchInput.addEventListener("keyup", () => {
+  let q = searchInput.value;
+
+  fetch(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${q}`)
+  .then(res => res.json())
+  .then(data => showMovies(data.results));
+});
+
+// 🎬 Trailer open
+function openMovie(id){
+  fetch(`https://api.themoviedb.org/3/movie/${id}/videos?api_key=${API_KEY}`)
+  .then(res => res.json())
+  .then(data => {
+    let vid = data.results.find(v => v.type === "Trailer");
+
+    if(vid){
+      window.open(`https://www.youtube.com/watch?v=${vid.key}`);
+    } else {
+      alert("Trailer not available");
+    }
+  });
+}
+
+</script>
+
+</body>
+</html>
