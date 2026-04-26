@@ -6,13 +6,87 @@
 <title>H.MOVIES PRO</title>
 
 <style>
-body {margin:0;background:#000;color:#fff;font-family:Arial;}
-header{text-align:center;padding:15px;}
-#search{width:90%;padding:10px;border-radius:10px;border:none;}
-.movies{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:10px;}
-.movie{background:#111;border-radius:10px;overflow:hidden;cursor:pointer;}
-.movie img{width:100%;}
-.movie p{text-align:center;font-size:14px;}
+body {
+  margin: 0;
+  background: #000;
+  color: #fff;
+  font-family: Arial;
+}
+
+header {
+  text-align: center;
+  padding: 15px;
+}
+
+#search {
+  width: 90%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  font-size: 16px;
+}
+
+h2 {
+  padding-left: 10px;
+}
+
+.movies {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  padding: 10px;
+}
+
+.movie {
+  background: #111;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.movie:hover {
+  transform: scale(1.03);
+}
+
+.movie img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+}
+
+.movie p {
+  text-align: center;
+  padding: 8px;
+  font-size: 14px;
+}
+
+/* popup */
+.popup {
+  position: fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background: rgba(0,0,0,0.9);
+  display:none;
+  justify-content:center;
+  align-items:center;
+}
+
+.popup iframe {
+  width:90%;
+  height:300px;
+}
+
+.close {
+  position:absolute;
+  top:20px;
+  right:20px;
+  font-size:25px;
+  cursor:pointer;
+}
 </style>
 </head>
 
@@ -23,11 +97,18 @@ header{text-align:center;padding:15px;}
 <input id="search" placeholder="Search movies...">
 </header>
 
-<h2 style="padding-left:10px;">🔥 Trending</h2>
+<h2>🔥 Trending</h2>
 <div id="movies" class="movies"></div>
+
+<!-- trailer popup -->
+<div id="popup" class="popup">
+  <span class="close" onclick="closePopup()">❌</span>
+  <iframe id="video" src="" frameborder="0" allowfullscreen></iframe>
+</div>
 
 <script>
 const API_KEY = "f409489a42d61f514484fa959f76fec7";
+const IMG = "https://image.tmdb.org/t/p/w500";
 const moviesDiv = document.getElementById("movies");
 const search = document.getElementById("search");
 
@@ -43,7 +124,7 @@ function showMovies(movies){
   movies.forEach(movie => {
 
     const imgURL = movie.poster_path 
-      ? "https://image.tmdb.org/t/p/w500" + movie.poster_path
+      ? IMG + movie.poster_path 
       : "https://via.placeholder.com/300x450?text=No+Image";
 
     const div = document.createElement("div");
@@ -54,24 +135,33 @@ function showMovies(movies){
       <p>${movie.title}</p>
     `;
 
-    div.onclick = () => {
-      window.open(
-        "https://www.youtube.com/results?search_query=" + movie.title + " trailer",
-        "_blank"
-      );
-    };
+    div.onclick = () => openTrailer(movie.title);
 
     moviesDiv.appendChild(div);
   });
 }
 
-getMovies(`https://api.themoviedb.org/3/trending/movie/week?api_key=${API_KEY}`);
+function openTrailer(name){
+  const query = name + " trailer";
+  document.getElementById("popup").style.display = "flex";
+  document.getElementById("video").src =
+    "https://www.youtube.com/embed?listType=search&list=" + query;
+}
 
+function closePopup(){
+  document.getElementById("popup").style.display = "none";
+  document.getElementById("video").src = "";
+}
+
+/* trending */
+getMovies(`https://api.allorigins.win/raw?url=https://api.themoviedb.org/3/trending/movie/week?api_key=${API_KEY}`);
+
+/* search */
 search.addEventListener("input", () => {
   if(search.value.length > 2){
-    getMovies(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${search.value}`);
+    getMovies(`https://api.allorigins.win/raw?url=https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${search.value}`);
   } else {
-    getMovies(`https://api.themoviedb.org/3/trending/movie/week?api_key=${API_KEY}`);
+    getMovies(`https://api.allorigins.win/raw?url=https://api.themoviedb.org/3/trending/movie/week?api_key=${API_KEY}`);
   }
 });
 </script>
