@@ -3,77 +3,127 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>H.MOVIES PRO</title>
+<title>H.MOVIES</title>
 
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXX"
-crossorigin="anonymous"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
 body {
   margin:0;
-  font-family:Arial;
+  font-family: 'Poppins', sans-serif;
   background:#000;
   color:#fff;
 }
 
-h1 {
-  padding:15px;
+/* Stylish Header */
+.header-title {
+  padding: 15px;
+  font-family: 'Bebas Neue', cursive;
+  font-size: 45px;
+  letter-spacing: 2px;
+  text-align: center;
+  margin: 0;
 }
+.header-title span.h { color: #00ff41; } /* Green */
+.header-title span.m { color: #ff0000; } /* Red */
 
 .search {
   width:90%;
-  margin:10px;
-  padding:10px;
-  border-radius:10px;
-  border:none;
+  margin:10px auto;
+  display: block;
+  padding:12px;
+  border-radius:25px;
+  border: 2px solid #00ff41;
+  background: #111;
+  color: #fff;
+  outline: none;
+}
+
+/* Category Buttons */
+.categories {
+  display: flex;
+  overflow-x: auto;
+  padding: 10px;
+  gap: 10px;
+  scrollbar-width: none;
+}
+.categories::-webkit-scrollbar { display: none; }
+
+.cat-btn {
+  background: #222;
+  color: #fff;
+  border: 1px solid #333;
+  padding: 8px 18px;
+  border-radius: 20px;
+  white-space: nowrap;
+  cursor: pointer;
+  font-size: 13px;
+}
+.cat-btn.active {
+  background: #00ff41;
+  color: #000;
+  font-weight: bold;
 }
 
 .grid {
   display:grid;
   grid-template-columns:repeat(2,1fr);
-  gap:10px;
+  gap:12px;
   padding:10px;
 }
 
 .movie {
   background:#111;
-  border-radius:10px;
+  border-radius:12px;
   overflow:hidden;
-  cursor:pointer;
+  border: 1px solid #222;
   display: flex;
   flex-direction: column;
 }
 
 .movie img {
   width:100%;
+  cursor: pointer;
 }
 
 .movie h3 {
-  padding:5px;
-  font-size:14px;
+  padding:8px;
+  font-size:13px;
+  margin: 0;
   flex-grow: 1;
+  text-align: center;
 }
 
-/* Download Button Styling */
 .download-btn {
   background: #ff0000;
   color: white;
   border: none;
-  padding: 10px;
+  padding: 12px;
   font-weight: bold;
   cursor: pointer;
-  border-radius: 0 0 10px 10px;
+  text-transform: uppercase;
+  font-size: 11px;
+}
+
+.download-btn:active {
+  background: #b30000;
 }
 </style>
 
 </head>
 <body>
 
-<h1>H.MOVIES PRO</h1>
+<h1 class="header-title"><span class="h">H.</span><span class="m">MOVIES</span></h1>
 
 <input class="search" placeholder="Search movies..." id="search">
 
-<h2 style="padding:10px;">🔥 Trending</h2>
+<div class="categories">
+  <button class="cat-btn active" onclick="loadMovies('trending')">🔥 Trending</button>
+  <button class="cat-btn" onclick="loadByCategory(28, this)">Action</button>
+  <button class="cat-btn" onclick="loadByCategory(35, this)">Comedy</button>
+  <button class="cat-btn" onclick="loadByCategory(27, this)">Horror</button>
+  <button class="cat-btn" onclick="loadByCategory(18, this)">Drama</button>
+</div>
 
 <div class="grid" id="movies"></div>
 
@@ -84,10 +134,24 @@ const IMG = "https://image.tmdb.org/t/p/w500";
 const moviesDiv = document.getElementById("movies");
 const searchInput = document.getElementById("search");
 
-// 🔥 Trending Load
-fetch(`https://api.themoviedb.org/3/trending/movie/day?api_key=${API_KEY}`)
-.then(res => res.json())
-.then(data => showMovies(data.results));
+// Initial Load
+loadMovies('trending');
+
+function loadMovies(type) {
+  fetch(`https://api.themoviedb.org/3/trending/movie/day?api_key=${API_KEY}`)
+  .then(res => res.json())
+  .then(data => showMovies(data.results));
+}
+
+function loadByCategory(genreId, btn) {
+  // Update button UI
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&with_genres=${genreId}`)
+  .then(res => res.json())
+  .then(data => showMovies(data.results));
+}
 
 function showMovies(movies){
   moviesDiv.innerHTML = "";
@@ -98,14 +162,13 @@ function showMovies(movies){
     div.innerHTML = `
       <img src="${IMG + movie.poster_path}" onclick="openMovie(${movie.id})">
       <h3>${movie.title}</h3>
-      <button class="download-btn" onclick="goToDownload('${movie.title}')">DOWNLOAD NOW</button>
+      <button class="download-btn" onclick="goToDownload('${movie.title}')">📥 DOWNLOAD NOW</button>
     `;
-
     moviesDiv.appendChild(div);
   });
 }
 
-// 🔍 Search
+// Search
 searchInput.addEventListener("keyup", () => {
   let q = searchInput.value;
   if(q.length > 2) {
@@ -115,25 +178,18 @@ searchInput.addEventListener("keyup", () => {
   }
 });
 
-// 🎬 Trailer open
 function openMovie(id){
   fetch(`https://api.themoviedb.org/3/movie/${id}/videos?api_key=${API_KEY}`)
   .then(res => res.json())
   .then(data => {
     let vid = data.results.find(v => v.type === "Trailer");
-    if(vid){
-      window.open(`https://www.youtube.com/watch?v=${vid.key}`);
-    } else {
-      alert("Trailer not available");
-    }
+    if(vid) window.open(`https://www.youtube.com/watch?v=${vid.key}`);
+    else alert("Trailer not available");
   });
 }
 
-// 🚀 HDHub4u Redirect Logic
 function goToDownload(title) {
-  // Movie title ko search query mein convert karna
   const query = encodeURIComponent(title);
-  // User ko seedha search results par bhejna
   const targetUrl = `https://new7.hdhub4u.fo/?s=${query}`;
   window.open(targetUrl, '_blank');
 }
