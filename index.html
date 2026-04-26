@@ -54,6 +54,7 @@ h1 {
   flex-grow: 1;
 }
 
+/* Download Button Styling */
 .download-btn {
   background: #ff0000;
   color: white;
@@ -107,9 +108,11 @@ function showMovies(movies){
 // 🔍 Search
 searchInput.addEventListener("keyup", () => {
   let q = searchInput.value;
-  fetch(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${q}`)
-  .then(res => res.json())
-  .then(data => showMovies(data.results));
+  if(q.length > 2) {
+    fetch(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${q}`)
+    .then(res => res.json())
+    .then(data => showMovies(data.results));
+  }
 });
 
 // 🎬 Trailer open
@@ -126,11 +129,13 @@ function openMovie(id){
   });
 }
 
-// 📥 Bollyflix.moda Search Link
+// 🚀 HDHub4u Redirect Logic
 function goToDownload(title) {
-  // Movie title ko search ke liye link banana
-  const searchUrl = `https://bollyflix.moda/?s=${encodeURIComponent(title)}`;
-  window.open(searchUrl, '_blank');
+  // Movie title ko search query mein convert karna
+  const query = encodeURIComponent(title);
+  // User ko seedha search results par bhejna
+  const targetUrl = `https://new7.hdhub4u.fo/?s=${query}`;
+  window.open(targetUrl, '_blank');
 }
 
 </script>
