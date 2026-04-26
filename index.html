@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>H.MOVIES</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Monoton&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
 body {
@@ -15,28 +15,29 @@ body {
   color:#fff;
 }
 
-/* Stylish Header */
+/* Stylish Neon Header */
 .header-title {
-  padding: 15px;
-  font-family: 'Bebas Neue', cursive;
-  font-size: 45px;
-  letter-spacing: 2px;
+  padding: 20px 10px;
+  font-family: 'Monoton', cursive;
+  font-size: 40px;
   text-align: center;
   margin: 0;
+  text-transform: uppercase;
 }
-.header-title span.h { color: #ffffff; } /* White */
-.header-title span.m { color: #ff0000; } /* Red */
+.header-title span.h { color: #ffffff; text-shadow: 0 0 10px #fff; } 
+.header-title span.m { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
 
 .search {
-  width:90%;
+  width:85%;
   margin:10px auto;
   display: block;
-  padding:12px;
-  border-radius:25px;
-  border: 1px solid #ffffff; /* White Border */
+  padding:12px 20px;
+  border-radius:30px;
+  border: 1px solid #ffffff;
   background: #111;
   color: #fff;
   outline: none;
+  font-size: 16px;
 }
 
 /* Category Buttons */
@@ -50,7 +51,7 @@ body {
 .categories::-webkit-scrollbar { display: none; }
 
 .cat-btn {
-  background: #222;
+  background: #111;
   color: #fff;
   border: 1px solid #333;
   padding: 8px 18px;
@@ -61,7 +62,7 @@ body {
   transition: 0.3s;
 }
 .cat-btn.active {
-  background: #ffffff; /* White active */
+  background: #ffffff;
   color: #000;
   font-weight: bold;
 }
@@ -93,6 +94,7 @@ body {
   margin: 0;
   flex-grow: 1;
   text-align: center;
+  font-weight: 400;
 }
 
 .download-btn {
@@ -102,12 +104,26 @@ body {
   padding: 12px;
   font-weight: bold;
   cursor: pointer;
-  text-transform: uppercase;
   font-size: 11px;
 }
 
-.download-btn:active {
-  background: #b30000;
+/* Load More Button */
+.load-more-container {
+  text-align: center;
+  padding: 20px;
+}
+.load-more-btn {
+  background: transparent;
+  color: #fff;
+  border: 2px solid #ff0000;
+  padding: 10px 30px;
+  border-radius: 25px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+.load-more-btn:hover {
+  background: #ff0000;
 }
 </style>
 
@@ -119,14 +135,19 @@ body {
 <input class="search" placeholder="Search movies..." id="search">
 
 <div class="categories">
-  <button class="cat-btn active" onclick="loadMovies('trending', this)">🔥 Trending</button>
-  <button class="cat-btn" onclick="loadByCategory(16, this)">Anime</button> <button class="cat-btn" onclick="loadByCategory(28, this)">Action</button>
+  <button class="cat-btn active" id="btn-trending" onclick="loadMovies('trending', this)">🔥 Trending</button>
+  <button class="cat-btn" onclick="loadByCategory(16, this)">Anime</button>
+  <button class="cat-btn" onclick="loadByCategory(28, this)">Action</button>
   <button class="cat-btn" onclick="loadByCategory(35, this)">Comedy</button>
   <button class="cat-btn" onclick="loadByCategory(27, this)">Horror</button>
   <button class="cat-btn" onclick="loadByCategory(18, this)">Drama</button>
 </div>
 
 <div class="grid" id="movies"></div>
+
+<div class="load-more-container">
+  <button class="load-more-btn" id="loadMore" onclick="loadMoreMovies()">LOAD MORE</button>
+</div>
 
 <script>
 
@@ -135,31 +156,56 @@ const IMG = "https://image.tmdb.org/t/p/w500";
 const moviesDiv = document.getElementById("movies");
 const searchInput = document.getElementById("search");
 
+let currentPage = 1;
+let currentGenre = null;
+let isSearch = false;
+
 // Initial Load
-loadMovies('trending', document.querySelector('.cat-btn'));
+loadMovies('trending');
 
 function loadMovies(type, btn) {
-  if(btn) {
-    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-  }
-  fetch(`https://api.themoviedb.org/3/trending/movie/day?api_key=${API_KEY}`)
-  .then(res => res.json())
-  .then(data => showMovies(data.results));
+  currentPage = 1;
+  currentGenre = null;
+  isSearch = false;
+  if(btn) updateActiveBtn(btn);
+  
+  fetchMovies(`https://api.themoviedb.org/3/trending/movie/day?api_key=${API_KEY}&page=${currentPage}`, true);
 }
 
 function loadByCategory(genreId, btn) {
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
+  currentPage = 1;
+  currentGenre = genreId;
+  isSearch = false;
+  updateActiveBtn(btn);
 
-  fetch(`https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&with_genres=${genreId}`)
+  fetchMovies(`https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&with_genres=${genreId}&page=${currentPage}`, true);
+}
+
+function loadMoreMovies() {
+  currentPage++;
+  let url = currentGenre 
+    ? `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&with_genres=${currentGenre}&page=${currentPage}`
+    : `https://api.themoviedb.org/3/trending/movie/day?api_key=${API_KEY}&page=${currentPage}`;
+    
+  if(isSearch) {
+    url = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${searchInput.value}&page=${currentPage}`;
+  }
+
+  fetchMovies(url, false);
+}
+
+function fetchMovies(url, clearGrid) {
+  fetch(url)
   .then(res => res.json())
-  .then(data => showMovies(data.results));
+  .then(data => {
+    if(clearGrid) moviesDiv.innerHTML = "";
+    showMovies(data.results);
+  });
 }
 
 function showMovies(movies){
-  moviesDiv.innerHTML = "";
   movies.forEach(movie => {
+    if(!movie.poster_path) return;
     const div = document.createElement("div");
     div.classList.add("movie");
 
@@ -172,13 +218,18 @@ function showMovies(movies){
   });
 }
 
+function updateActiveBtn(btn) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
 // Search
 searchInput.addEventListener("keyup", () => {
   let q = searchInput.value;
   if(q.length > 2) {
-    fetch(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${q}`)
-    .then(res => res.json())
-    .then(data => showMovies(data.results));
+    isSearch = true;
+    currentPage = 1;
+    fetchMovies(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${q}&page=${currentPage}`, true);
   }
 });
 
