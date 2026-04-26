@@ -24,7 +24,7 @@ body {
   text-align: center;
   margin: 0;
 }
-.header-title span.h { color: #00ff41; } /* Green */
+.header-title span.h { color: #ffffff; } /* White */
 .header-title span.m { color: #ff0000; } /* Red */
 
 .search {
@@ -33,7 +33,7 @@ body {
   display: block;
   padding:12px;
   border-radius:25px;
-  border: 2px solid #00ff41;
+  border: 1px solid #ffffff; /* White Border */
   background: #111;
   color: #fff;
   outline: none;
@@ -58,9 +58,10 @@ body {
   white-space: nowrap;
   cursor: pointer;
   font-size: 13px;
+  transition: 0.3s;
 }
 .cat-btn.active {
-  background: #00ff41;
+  background: #ffffff; /* White active */
   color: #000;
   font-weight: bold;
 }
@@ -118,8 +119,8 @@ body {
 <input class="search" placeholder="Search movies..." id="search">
 
 <div class="categories">
-  <button class="cat-btn active" onclick="loadMovies('trending')">🔥 Trending</button>
-  <button class="cat-btn" onclick="loadByCategory(28, this)">Action</button>
+  <button class="cat-btn active" onclick="loadMovies('trending', this)">🔥 Trending</button>
+  <button class="cat-btn" onclick="loadByCategory(16, this)">Anime</button> <button class="cat-btn" onclick="loadByCategory(28, this)">Action</button>
   <button class="cat-btn" onclick="loadByCategory(35, this)">Comedy</button>
   <button class="cat-btn" onclick="loadByCategory(27, this)">Horror</button>
   <button class="cat-btn" onclick="loadByCategory(18, this)">Drama</button>
@@ -135,16 +136,19 @@ const moviesDiv = document.getElementById("movies");
 const searchInput = document.getElementById("search");
 
 // Initial Load
-loadMovies('trending');
+loadMovies('trending', document.querySelector('.cat-btn'));
 
-function loadMovies(type) {
+function loadMovies(type, btn) {
+  if(btn) {
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  }
   fetch(`https://api.themoviedb.org/3/trending/movie/day?api_key=${API_KEY}`)
   .then(res => res.json())
   .then(data => showMovies(data.results));
 }
 
 function loadByCategory(genreId, btn) {
-  // Update button UI
   document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
 
