@@ -34,3 +34,14 @@ movies.forEach(movie => {
 
   moviesContainer.appendChild(div);
 });
+const searchBox = document.getElementById("searchBox");
+
+searchBox.addEventListener("input", () => {
+  const value = searchBox.value.toLowerCase();
+  const movieDivs = document.querySelectorAll(".movie");
+
+  movieDivs.forEach(div => {
+    const title = div.innerText.toLowerCase();
+    div.style.display = title.includes(value) ? "block" : "none";
+  });
+});
