@@ -11,24 +11,21 @@ crossorigin="anonymous"></script>
 <style>
 body {
   margin:0;
-  font-family: Arial, sans-serif;
+  font-family:Arial;
   background:#000;
   color:#fff;
 }
 
 h1 {
   padding:15px;
-  color: #ff0000;
 }
 
 .search {
   width:90%;
   margin:10px;
-  padding:12px;
+  padding:10px;
   border-radius:10px;
   border:none;
-  background: #1a1a1a;
-  color: #fff;
 }
 
 .grid {
@@ -42,43 +39,29 @@ h1 {
   background:#111;
   border-radius:10px;
   overflow:hidden;
-  text-align: center;
+  cursor:pointer;
+  display: flex;
+  flex-direction: column;
 }
 
 .movie img {
   width:100%;
-  display: block;
-  cursor: pointer;
-}
-
-.movie-title-box {
-  background: #1a1a1a;
-  padding: 8px 5px;
 }
 
 .movie h3 {
-  margin: 0;
-  font-size: 14px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  padding:5px;
+  font-size:14px;
+  flex-grow: 1;
 }
 
 .download-btn {
   background: #ff0000;
   color: white;
   border: none;
-  width: 100%;
-  padding: 12px;
+  padding: 10px;
   font-weight: bold;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.download-btn:active {
-  background: #cc0000;
+  border-radius: 0 0 10px 10px;
 }
 </style>
 
@@ -100,7 +83,7 @@ const IMG = "https://image.tmdb.org/t/p/w500";
 const moviesDiv = document.getElementById("movies");
 const searchInput = document.getElementById("search");
 
-// Trending Movies
+// 🔥 Trending Load
 fetch(`https://api.themoviedb.org/3/trending/movie/day?api_key=${API_KEY}`)
 .then(res => res.json())
 .then(data => showMovies(data.results));
@@ -113,29 +96,23 @@ function showMovies(movies){
 
     div.innerHTML = `
       <img src="${IMG + movie.poster_path}" onclick="openMovie(${movie.id})">
-      <div class="movie-title-box">
-        <h3>${movie.title}</h3>
-      </div>
-      <button class="download-btn" onclick="openBollyflix('${movie.title}')">
-        📥 DOWNLOAD NOW
-      </button>
+      <h3>${movie.title}</h3>
+      <button class="download-btn" onclick="goToDownload('${movie.title}')">DOWNLOAD NOW</button>
     `;
 
     moviesDiv.appendChild(div);
   });
 }
 
-// Search
+// 🔍 Search
 searchInput.addEventListener("keyup", () => {
   let q = searchInput.value;
-  if(q.length > 2) {
-    fetch(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${q}`)
-    .then(res => res.json())
-    .then(data => showMovies(data.results));
-  }
+  fetch(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${q}`)
+  .then(res => res.json())
+  .then(data => showMovies(data.results));
 });
 
-// Trailer
+// 🎬 Trailer open
 function openMovie(id){
   fetch(`https://api.themoviedb.org/3/movie/${id}/videos?api_key=${API_KEY}`)
   .then(res => res.json())
@@ -149,15 +126,11 @@ function openMovie(id){
   });
 }
 
-// 🔥 Bollyflix Direct Search Logic
-function openBollyflix(title) {
-  // Movie ka naam encode karke search query banayi
-  const query = encodeURIComponent(title);
-  
-  // Bollyflix ka direct search link
-  const bollyUrl = `https://bollyflix.law/?s=${query}`;
-  
-  window.open(bollyUrl, '_blank');
+// 📥 Bollyflix.moda Search Link
+function goToDownload(title) {
+  // Movie title ko search ke liye link banana
+  const searchUrl = `https://bollyflix.moda/?s=${encodeURIComponent(title)}`;
+  window.open(searchUrl, '_blank');
 }
 
 </script>
