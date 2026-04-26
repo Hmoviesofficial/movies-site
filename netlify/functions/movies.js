@@ -1,21 +1,11 @@
 exports.handler = async function () {
-  try {
-    const apiKey = process.env.TMDB_API_KEY;
+  const API_KEY = process.env.TMDB_KEY;
 
-    const res = await fetch(
-      `https://api.themoviedb.org/3/trending/movie/week?api_key=${apiKey}`
-    );
+  const res = await fetch(`https://api.themoviedb.org/3/trending/movie/week?api_key=${API_KEY}`);
+  const data = await res.json();
 
-    const data = await res.json();
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify(data),
-    };
-  } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: "Failed to fetch movies" }),
-    };
-  }
+  return {
+    statusCode: 200,
+    body: JSON.stringify(data)
+  };
 };
