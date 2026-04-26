@@ -69,13 +69,12 @@ h1 {
   color: white;
   border: none;
   width: 100%;
-  padding: 10px;
+  padding: 12px;
   font-weight: bold;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
 }
 
 .download-btn:active {
@@ -101,7 +100,7 @@ const IMG = "https://image.tmdb.org/t/p/w500";
 const moviesDiv = document.getElementById("movies");
 const searchInput = document.getElementById("search");
 
-// Trending Movies Load
+// Trending Movies
 fetch(`https://api.themoviedb.org/3/trending/movie/day?api_key=${API_KEY}`)
 .then(res => res.json())
 .then(data => showMovies(data.results));
@@ -117,7 +116,7 @@ function showMovies(movies){
       <div class="movie-title-box">
         <h3>${movie.title}</h3>
       </div>
-      <button class="download-btn" onclick="openHdhub('${movie.title}')">
+      <button class="download-btn" onclick="openBollyflix('${movie.title}')">
         📥 DOWNLOAD NOW
       </button>
     `;
@@ -126,7 +125,7 @@ function showMovies(movies){
   });
 }
 
-// Search Function
+// Search
 searchInput.addEventListener("keyup", () => {
   let q = searchInput.value;
   if(q.length > 2) {
@@ -136,7 +135,7 @@ searchInput.addEventListener("keyup", () => {
   }
 });
 
-// Trailer Function
+// Trailer
 function openMovie(id){
   fetch(`https://api.themoviedb.org/3/movie/${id}/videos?api_key=${API_KEY}`)
   .then(res => res.json())
@@ -150,16 +149,15 @@ function openMovie(id){
   });
 }
 
-// 🔥 Direct HDHub4u Search Command
-function openHdhub(title) {
-  // Movie name ko saaf karke search query banana
+// 🔥 Bollyflix Direct Search Logic
+function openBollyflix(title) {
+  // Movie ka naam encode karke search query banayi
   const query = encodeURIComponent(title);
   
-  // HDHub4u.tv ka direct search link jo landing page ko bypass karne ki koshish karega
-  const targetUrl = `https://hdhub4u.tv/?s=${query}`;
+  // Bollyflix ka direct search link
+  const bollyUrl = `https://bollyflix.law/?s=${query}`;
   
-  // Isse naye tab mein movie ka search result khulega
-  window.open(targetUrl, '_blank');
+  window.open(bollyUrl, '_blank');
 }
 
 </script>
