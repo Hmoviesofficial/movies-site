@@ -21,14 +21,9 @@ body {
   display: flex;
   align-items: center;
   padding: 10px 20px;
-  position: relative;
 }
 
-.menu-icon {
-  font-size: 30px;
-  cursor: pointer;
-  z-index: 1001;
-}
+.menu-icon { font-size: 30px; cursor: pointer; z-index: 1001; }
 
 .header-title {
   flex-grow: 1;
@@ -41,95 +36,63 @@ body {
 .header-title span.h { color: #ffffff; text-shadow: 0 0 10px #fff; } 
 .header-title span.m { color: #ff0000; text-shadow: 0 0 10px #ff0000; }
 
-/* Side Navigation Drawer */
+/* Sidebar */
 .sidebar {
-  height: 100%;
-  width: 0;
-  position: fixed;
-  z-index: 1000;
-  top: 0;
-  left: 0;
-  background-color: #111;
-  overflow-x: hidden;
-  transition: 0.5s;
-  padding-top: 80px;
-  border-right: 1px solid #ff0000;
+  height: 100%; width: 0; position: fixed; z-index: 1000; top: 0; left: 0;
+  background-color: #111; overflow-x: hidden; transition: 0.5s;
+  padding-top: 80px; border-right: 1px solid #ff0000;
 }
+.sidebar a { padding: 15px 25px; text-decoration: none; font-size: 18px; color: #fff; display: block; border-bottom: 1px solid #222; }
+.sidebar a:hover { background: #ff0000; }
+.sidebar .close-btn { position: absolute; top: 20px; right: 25px; font-size: 36px; cursor: pointer; }
 
-.sidebar a {
-  padding: 15px 25px;
-  text-decoration: none;
-  font-size: 18px;
-  color: #fff;
-  display: block;
-  transition: 0.3s;
-  border-bottom: 1px solid #222;
-}
-
-.sidebar a:hover {
-  background: #ff0000;
-  color: white;
-}
-
-.sidebar .close-btn {
-  position: absolute;
-  top: 20px;
-  right: 25px;
-  font-size: 36px;
-  cursor: pointer;
-}
-
-/* Main Content Styles */
+/* Search */
 .search {
-  width:85%;
-  margin:10px auto;
-  display: block;
-  padding:12px 20px;
-  border-radius:30px;
-  border: 1px solid #ffffff;
-  background: #111;
-  color: #fff;
-  outline: none;
+  width:85%; margin:10px auto; display: block; padding: 12px 20px;
+  border-radius:30px; border: 1px solid #ffffff; background: #111; color: #fff; outline: none;
 }
 
-.grid {
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:12px;
-  padding:10px;
-}
+/* Grid */
+.grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; padding:10px; }
 
 .movie {
-  background:#111;
-  border-radius:12px;
-  overflow:hidden;
-  border: 1px solid #222;
-  display: flex;
-  flex-direction: column;
+  background:#111; border-radius:12px; overflow:hidden; border: 1px solid #222;
+  display: flex; flex-direction: column; position: relative;
 }
 
-.movie img { width:100%; cursor: pointer; }
-.movie h3 { padding:8px; font-size:13px; margin: 0; text-align: center; flex-grow: 1; }
+/* Poster Styling & Trailer Logic */
+.poster-container { position: relative; width: 100%; cursor: pointer; }
+.movie img { width:100%; display: block; }
 
-.download-btn {
+.trailer-overlay {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.7); display: none; flex-direction: column;
+  justify-content: center; align-items: center; transition: 0.3s;
+}
+.play-icon { font-size: 45px; color: #fff; opacity: 0.8; }
+.trailer-text { font-size: 12px; font-weight: bold; color: #fff; margin-top: 5px; text-transform: uppercase; background: rgba(255,0,0,0.8); padding: 2px 8px; border-radius: 4px; }
+
+.movie h3 { padding:8px; font-size: 12px; margin: 0; text-align: center; flex-grow: 1; height: 35px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+
+/* Single Button Style */
+.download-watch-btn {
   background: #ff0000;
   color: white;
   border: none;
+  width: 100%;
   padding: 12px;
   font-weight: bold;
   cursor: pointer;
   font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
+.download-watch-btn:active { background: #b30000; }
+
 .load-more-container { text-align: center; padding: 20px; }
-.load-more-btn {
-  background: transparent;
-  color: #fff;
-  border: 2px solid #ff0000;
-  padding: 10px 30px;
-  border-radius: 25px;
-  cursor: pointer;
-}
+.load-more-btn { background: transparent; color: #fff; border: 2px solid #ff0000; padding: 10px 30px; border-radius: 25px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+.load-more-btn:active { background: #ff0000; }
 </style>
 
 </head>
@@ -143,7 +106,6 @@ body {
   <a href="#" onclick="loadByCategory(35); closeNav()">Comedy</a>
   <a href="#" onclick="loadByCategory(27); closeNav()">Horror</a>
   <a href="#" onclick="loadByCategory(18); closeNav()">Drama</a>
-  <a href="#" onclick="loadByCategory(878); closeNav()">Sci-Fi</a>
 </div>
 
 <div class="top-bar">
@@ -168,12 +130,11 @@ const searchInput = document.getElementById("search");
 let currentPage = 1;
 let currentGenre = null;
 let isSearch = false;
+let activeMovieId = null;
 
-// Sidebar Controls
 function openNav() { document.getElementById("mySidebar").style.width = "250px"; }
 function closeNav() { document.getElementById("mySidebar").style.width = "0"; }
 
-// Initial Load
 loadMovies('trending');
 
 function loadMovies(type) {
@@ -208,12 +169,49 @@ function showMovies(movies){
     const div = document.createElement("div");
     div.classList.add("movie");
     div.innerHTML = `
-      <img src="${IMG + movie.poster_path}" onclick="openMovie(${movie.id})">
+      <div class="poster-container" id="poster-${movie.id}" onclick="handlePosterClick(${movie.id})">
+        <img src="${IMG + movie.poster_path}">
+        <div class="trailer-overlay" id="overlay-${movie.id}">
+           <div class="play-icon">▶</div>
+           <div class="trailer-text">Trailer</div>
+        </div>
+      </div>
       <h3>${movie.title}</h3>
-      <button class="download-btn" onclick="goToDownload('${movie.title}')">📥 DOWNLOAD NOW</button>
+      <button class="download-watch-btn" onclick="goToSearch('${movie.title}')">
+        📥 DOWNLOAD OR WATCH
+      </button>
     `;
     moviesDiv.appendChild(div);
   });
+}
+
+// Poster Logic: 1st Click = Overlay, 2nd Click = Trailer
+function handlePosterClick(id) {
+  const overlay = document.getElementById(`overlay-${id}`);
+  
+  if (activeMovieId === id) {
+    openTrailer(id);
+    overlay.style.display = "none";
+    activeMovieId = null;
+  } else {
+    document.querySelectorAll('.trailer-overlay').forEach(el => el.style.display = "none");
+    overlay.style.display = "flex";
+    activeMovieId = id;
+  }
+}
+
+function openTrailer(id){
+  fetch(`https://api.themoviedb.org/3/movie/${id}/videos?api_key=${API_KEY}`)
+  .then(res => res.json()).then(data => {
+    let vid = data.results.find(v => v.type === "Trailer");
+    if(vid) window.open(`https://www.youtube.com/watch?v=${vid.key}`);
+    else alert("Trailer not available");
+  });
+}
+
+function goToSearch(title) {
+  const query = encodeURIComponent(title);
+  window.open(`https://new7.hdhub4u.fo/?s=${query}`, '_blank');
 }
 
 searchInput.addEventListener("keyup", () => {
@@ -223,20 +221,6 @@ searchInput.addEventListener("keyup", () => {
     fetchMovies(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${q}&page=${currentPage}`, true);
   }
 });
-
-function openMovie(id){
-  fetch(`https://api.themoviedb.org/3/movie/${id}/videos?api_key=${API_KEY}`)
-  .then(res => res.json()).then(data => {
-    let vid = data.results.find(v => v.type === "Trailer");
-    if(vid) window.open(`https://www.youtube.com/watch?v=${vid.key}`);
-    else alert("Trailer not available");
-  });
-}
-
-function goToDownload(title) {
-  const query = encodeURIComponent(title);
-  window.open(`https://new7.hdhub4u.fo/?s=${query}`, '_blank');
-}
 </script>
 
 </body>
