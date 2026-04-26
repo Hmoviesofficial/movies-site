@@ -5,28 +5,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>H.MOVIES PRO</title>
 
-<!-- Adsense (baad me apna ID dalna) -->
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXX"
 crossorigin="anonymous"></script>
 
 <style>
 body {
   margin:0;
-  font-family:Arial;
+  font-family:Arial, sans-serif;
   background:#000;
   color:#fff;
 }
 
 h1 {
   padding:15px;
+  color: #e50914;
 }
 
 .search {
   width:90%;
-  margin:10px;
-  padding:10px;
+  margin:10px auto;
+  display: block;
+  padding:12px;
   border-radius:10px;
   border:none;
+  background: #222;
+  color: white;
 }
 
 .grid {
@@ -40,16 +43,45 @@ h1 {
   background:#111;
   border-radius:10px;
   overflow:hidden;
-  cursor:pointer;
+  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .movie img {
   width:100%;
+  height: auto;
+  cursor: pointer;
+}
+
+.movie-info {
+  padding: 10px;
+  padding-bottom: 50px; /* Space for button */
 }
 
 .movie h3 {
-  padding:5px;
-  font-size:14px;
+  margin: 0;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Download Button Styling */
+.dl-btn {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: #e50914;
+  color: white;
+  border: none;
+  padding: 10px 0;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 13px;
+  transition: 0.3s;
+}
+
+.dl-btn:hover {
+  background: #ff0000;
 }
 </style>
 
@@ -67,14 +99,11 @@ h1 {
 <script>
 
 const API_KEY = "f409489a42d61f514484fa959f76fec7";
-
 const IMG = "https://image.tmdb.org/t/p/w500";
-
 const moviesDiv = document.getElementById("movies");
-
 const searchInput = document.getElementById("search");
 
-// 🔥 Trending Load
+// 🔥 Trending Load Initial
 fetch(`https://api.themoviedb.org/3/trending/movie/day?api_key=${API_KEY}`)
 .then(res => res.json())
 .then(data => showMovies(data.results));
@@ -86,38 +115,50 @@ function showMovies(movies){
     div.classList.add("movie");
 
     div.innerHTML = `
-      <img src="${IMG + movie.poster_path}">
-      <h3>${movie.title}</h3>
+      <img src="${IMG + movie.poster_path}" onclick="openMovie(${movie.id})" alt="${movie.title}">
+      <div class="movie-info">
+        <h3>${movie.title}</h3>
+      </div>
+      <button class="dl-btn" onclick="downloadFromHDHub('${movie.title}')">
+        📥 DOWNLOAD NOW
+      </button>
     `;
-
-    div.onclick = () => openMovie(movie.id);
 
     moviesDiv.appendChild(div);
   });
 }
 
-// 🔍 Search
+// 🔍 Search Functionality
 searchInput.addEventListener("keyup", () => {
   let q = searchInput.value;
-
-  fetch(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${q}`)
-  .then(res => res.json())
-  .then(data => showMovies(data.results));
+  if(q.length > 2) {
+    fetch(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${q}`)
+    .then(res => res.json())
+    .then(data => showMovies(data.results));
+  }
 });
 
-// 🎬 Trailer open
+// 🎬 Trailer Open (Poster click par)
 function openMovie(id){
   fetch(`https://api.themoviedb.org/3/movie/${id}/videos?api_key=${API_KEY}`)
   .then(res => res.json())
   .then(data => {
     let vid = data.results.find(v => v.type === "Trailer");
-
     if(vid){
       window.open(`https://www.youtube.com/watch?v=${vid.key}`);
     } else {
       alert("Trailer not available");
     }
   });
+}
+
+// 🚀 HDHub4u Redirect Function
+function downloadFromHDHub(title) {
+  // Movie title ko URL format me convert karta hai
+  const query = encodeURIComponent(title);
+  // HDHub4u ke search page par redirect
+  const hdhubUrl = `https://hdhub4u.work/?s=${query}`;
+  window.open(hdhubUrl, '_blank');
 }
 
 </script>
