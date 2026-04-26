@@ -23,7 +23,6 @@ header {
   padding: 12px;
   border-radius: 10px;
   border: none;
-  outline: none;
   font-size: 16px;
 }
 
@@ -43,11 +42,6 @@ h2 {
   border-radius: 10px;
   overflow: hidden;
   cursor: pointer;
-  transition: 0.2s;
-}
-
-.movie:hover {
-  transform: scale(1.03);
 }
 
 .movie img {
@@ -59,7 +53,6 @@ h2 {
 .movie p {
   text-align: center;
   padding: 8px;
-  font-size: 14px;
 }
 
 /* popup */
@@ -100,7 +93,6 @@ h2 {
 <h2>🔥 Trending</h2>
 <div id="movies" class="movies"></div>
 
-<!-- trailer popup -->
 <div id="popup" class="popup">
   <span class="close" onclick="closePopup()">❌</span>
   <iframe id="video" src="" frameborder="0" allowfullscreen></iframe>
@@ -109,43 +101,52 @@ h2 {
 <script>
 const API_KEY = "f409489a42d61f514484fa959f76fec7";
 const IMG = "https://image.tmdb.org/t/p/w500";
+
 const moviesDiv = document.getElementById("movies");
 const search = document.getElementById("search");
 
-async function getMovies(url){
-  const res = await fetch(url);
-  const data = await res.json();
-  showMovies(data.results);
-}
+async function loadMovies(query=""){
+  let url;
 
-function showMovies(movies){
-  moviesDiv.innerHTML = "";
+  if(query){
+    url = `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${query}`;
+  } else {
+    url = `https://api.themoviedb.org/3/trending/movie/week?api_key=${API_KEY}`;
+  }
 
-  movies.forEach(movie => {
+  try{
+    const res = await fetch(url);
+    const data = await res.json();
 
-    const imgURL = movie.poster_path 
-      ? IMG + movie.poster_path 
-      : "https://via.placeholder.com/300x450?text=No+Image";
+    moviesDiv.innerHTML = "";
 
-    const div = document.createElement("div");
-    div.classList.add("movie");
+    data.results.forEach(movie => {
+      const img = movie.poster_path 
+        ? IMG + movie.poster_path 
+        : "https://via.placeholder.com/300x450?text=No+Image";
 
-    div.innerHTML = `
-      <img src="${imgURL}">
-      <p>${movie.title}</p>
-    `;
+      const div = document.createElement("div");
+      div.className = "movie";
 
-    div.onclick = () => openTrailer(movie.title);
+      div.innerHTML = `
+        <img src="${img}">
+        <p>${movie.title}</p>
+      `;
 
-    moviesDiv.appendChild(div);
-  });
+      div.onclick = () => openTrailer(movie.title);
+
+      moviesDiv.appendChild(div);
+    });
+
+  }catch(err){
+    moviesDiv.innerHTML = "<p style='color:red'>API Error (VPN try karo)</p>";
+  }
 }
 
 function openTrailer(name){
-  const query = name + " trailer";
   document.getElementById("popup").style.display = "flex";
   document.getElementById("video").src =
-    "https://www.youtube.com/embed?listType=search&list=" + query;
+    "https://www.youtube.com/embed?listType=search&list=" + name + " trailer";
 }
 
 function closePopup(){
@@ -153,16 +154,12 @@ function closePopup(){
   document.getElementById("video").src = "";
 }
 
-/* trending */
-getMovies(`https://api.allorigins.win/raw?url=https://api.themoviedb.org/3/trending/movie/week?api_key=${API_KEY}`);
+/* load trending */
+loadMovies();
 
 /* search */
 search.addEventListener("input", () => {
-  if(search.value.length > 2){
-    getMovies(`https://api.allorigins.win/raw?url=https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${search.value}`);
-  } else {
-    getMovies(`https://api.allorigins.win/raw?url=https://api.themoviedb.org/3/trending/movie/week?api_key=${API_KEY}`);
-  }
+  loadMovies(search.value);
 });
 </script>
 
