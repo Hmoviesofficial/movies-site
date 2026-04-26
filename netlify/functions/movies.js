@@ -1,7 +1,9 @@
 exports.handler = async function () {
   try {
+    const apiKey = process.env.TMDB_API_KEY;
+
     const res = await fetch(
-      "https://api.themoviedb.org/3/trending/movie/week?api_key=f409489a42d61f514484fa959f76fec7"
+      `https://api.themoviedb.org/3/trending/movie/week?api_key=${apiKey}`
     );
 
     const data = await res.json();
