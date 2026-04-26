@@ -1,34 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>H.Movies Pro</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Adsense -->
+  <meta name="google-adsense-account" content="ca-pub-5471522533142227">
+  <script async 
+    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5471522533142227"
+    crossorigin="anonymous"></script>
+
+  <title>H.MOVIES PRO</title>
+
+  <style>
+    body {
+      background: black;
+      color: white;
+      font-family: Arial;
+      margin: 0;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    #searchBox {
+      width: 90%;
+      margin: 10px;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+    }
+
+    .movies {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      padding: 10px;
+    }
+
+    .movie {
+      background: #111;
+      border-radius: 10px;
+      overflow: hidden;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .movie img {
+      width: 100%;
+    }
+
+    .movie p {
+      padding: 5px;
+      font-size: 14px;
+    }
+
+    .footer {
+      text-align: center;
+      padding: 10px;
+    }
+
+    a {
+      color: white;
+    }
+  </style>
 </head>
 
 <body>
 
-<header>
-  <h1>H.MOVIES PRO</h1>
-  <input type="text" id="search" placeholder="Search movies...">
-</header>
+<h1>🎬 H.MOVIES PRO</h1>
 
-<section class="trending">
-  <h2>🔥 Trending</h2>
-  <div class="movies" id="movies"></div>
-</section>
+<input type="text" id="searchBox" placeholder="🔍 Find Movie...">
 
-<!-- Popup -->
-<div id="popup" class="popup">
-  <div class="popup-content">
-    <span id="close">&times;</span>
-    <h2 id="title"></h2>
-    <button id="watch">▶ Watch Trailer</button>
-    <button id="find">🔍 Find Movie</button>
-  </div>
+<h2>🔥 Trending Movies</h2>
+
+<div id="movies" class="movies"></div>
+
+<hr>
+
+<div class="footer">
+  <a href="#">About</a> |
+  <a href="#">Contact</a> |
+  <a href="#">Privacy</a>
 </div>
 
-<script src="script.js"></script>
+<script>
+const API_KEY = "f409489a42d61f514484fa959f76fec7"; // direct use
+const BASE_URL = "https://api.themoviedb.org/3";
+
+const moviesContainer = document.getElementById("movies");
+const searchBox = document.getElementById("searchBox");
+
+// Load trending movies
+async function loadMovies() {
+  const res = await fetch(\`\${BASE_URL}/trending/movie/week?api_key=\${API_KEY}\`);
+  const data = await res.json();
+  showMovies(data.results);
+}
+
+// Show movies
+function showMovies(movies) {
+  moviesContainer.innerHTML = "";
+
+  movies.forEach(movie => {
+    if (!movie.poster_path) return;
+
+    const div = document.createElement("div");
+    div.classList.add("movie");
+
+    div.innerHTML = `
+      <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}">
+      <p><b>${movie.title}</b></p>
+      <p>This is a trending movie. Watch trailer & explore more details.</p>
+    `;
+
+    // Click → Trailer
+    div.addEventListener("click", () => {
+      const query = encodeURIComponent(movie.title + " trailer");
+      window.open("https://www.youtube.com/results?search_query=" + query, "_blank");
+    });
+
+    moviesContainer.appendChild(div);
+  });
+}
+
+// Search
+searchBox.addEventListener("input", async () => {
+  const query = searchBox.value;
+
+  if (query.length < 2) {
+    loadMovies();
+    return;
+  }
+
+  const res = await fetch(\`\${BASE_URL}/search/movie?api_key=\${API_KEY}&query=\${query}\`);
+  const data = await res.json();
+
+  showMovies(data.results);
+});
+
+// Start
+loadMovies();
+</script>
+
 </body>
 </html>
