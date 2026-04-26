@@ -1,147 +1,148 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Adsense -->
-  <meta name="google-adsense-account" content="ca-pub-5471522533142227">
-  <script async 
-    src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5471522533142227"
-    crossorigin="anonymous"></script>
+<title>H.MOVIES PRO</title>
 
-  <title>H.MOVIES PRO</title>
+<meta name="google-adsense-account" content="ca-pub-5471522533142227">
 
-  <style>
-    body {
-      background: black;
-      color: white;
-      font-family: Arial;
-      margin: 0;
-    }
+<style>
+body {
+  margin:0;
+  font-family:Arial;
+  background:#000;
+  color:#fff;
+}
 
-    h1 {
-      text-align: center;
-    }
+header {
+  text-align:center;
+  padding:15px;
+}
 
-    #searchBox {
-      width: 90%;
-      margin: 10px;
-      padding: 10px;
-      border-radius: 10px;
-      border: none;
-    }
+h1 {
+  margin:0;
+}
 
-    .movies {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      padding: 10px;
-    }
+#search {
+  width:90%;
+  padding:12px;
+  margin-top:10px;
+  border-radius:10px;
+  border:none;
+}
 
-    .movie {
-      background: #111;
-      border-radius: 10px;
-      overflow: hidden;
-      cursor: pointer;
-      text-align: center;
-    }
+.movies {
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+  padding:10px;
+}
 
-    .movie img {
-      width: 100%;
-    }
+.movie {
+  background:#111;
+  border-radius:12px;
+  overflow:hidden;
+  cursor:pointer;
+  transition:0.3s;
+}
 
-    .movie p {
-      padding: 5px;
-      font-size: 14px;
-    }
+.movie:hover {
+  transform:scale(1.05);
+}
 
-    .footer {
-      text-align: center;
-      padding: 10px;
-    }
+.movie img {
+  width:100%;
+}
 
-    a {
-      color: white;
-    }
-  </style>
+.movie p {
+  text-align:center;
+  padding:5px;
+  font-size:14px;
+}
+
+.footer {
+  text-align:center;
+  padding:20px;
+}
+
+a {
+  color:#fff;
+}
+</style>
 </head>
 
 <body>
 
+<header>
 <h1>🎬 H.MOVIES PRO</h1>
+<input id="search" placeholder="🔍 Search movies...">
+</header>
 
-<input type="text" id="searchBox" placeholder="🔍 Find Movie...">
-
-<h2>🔥 Trending Movies</h2>
+<h2 style="padding-left:10px;">🔥 Trending Movies</h2>
 
 <div id="movies" class="movies"></div>
 
-<hr>
-
 <div class="footer">
-  <a href="#">About</a> |
-  <a href="#">Contact</a> |
-  <a href="#">Privacy</a>
+<a href="about.html">About</a> |
+<a href="contact.html">Contact</a> |
+<a href="privacy.html">Privacy</a>
 </div>
 
 <script>
-const API_KEY = "f409489a42d61f514484fa959f76fec7"; // direct use
-const BASE_URL = "https://api.themoviedb.org/3";
+const API_KEY = "f409489a42d61f514484fa959f76fec7";
 
-const moviesContainer = document.getElementById("movies");
-const searchBox = document.getElementById("searchBox");
+const moviesDiv = document.getElementById("movies");
+const search = document.getElementById("search");
 
-// Load trending movies
-async function loadMovies() {
-  const res = await fetch(\`\${BASE_URL}/trending/movie/week?api_key=\${API_KEY}\`);
+// Fetch movies
+async function getMovies(url){
+  const res = await fetch(url);
   const data = await res.json();
   showMovies(data.results);
 }
 
 // Show movies
-function showMovies(movies) {
-  moviesContainer.innerHTML = "";
+function showMovies(movies){
+  moviesDiv.innerHTML = "";
 
   movies.forEach(movie => {
-    if (!movie.poster_path) return;
+    if(!movie.poster_path) return;
+
+    const imgURL = "https://image.tmdb.org/t/p/w500" + movie.poster_path;
 
     const div = document.createElement("div");
     div.classList.add("movie");
 
     div.innerHTML = `
-      <img src="https://image.tmdb.org/t/p/w500${movie.poster_path}">
+      <img src="${imgURL}" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
       <p><b>${movie.title}</b></p>
-      <p>This is a trending movie. Watch trailer & explore more details.</p>
+      <p style="font-size:12px;color:#aaa;">Click to watch trailer</p>
     `;
 
-    // Click → Trailer
-    div.addEventListener("click", () => {
-      const query = encodeURIComponent(movie.title + " trailer");
-      window.open("https://www.youtube.com/results?search_query=" + query, "_blank");
-    });
+    div.onclick = () => {
+      window.open(
+        "https://www.youtube.com/results?search_query=" + movie.title + " trailer",
+        "_blank"
+      );
+    };
 
-    moviesContainer.appendChild(div);
+    moviesDiv.appendChild(div);
   });
 }
 
+// Trending load
+getMovies(`https://api.themoviedb.org/3/trending/movie/week?api_key=${API_KEY}`);
+
 // Search
-searchBox.addEventListener("input", async () => {
-  const query = searchBox.value;
-
-  if (query.length < 2) {
-    loadMovies();
-    return;
+search.addEventListener("input", () => {
+  if(search.value.length > 2){
+    getMovies(`https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&query=${search.value}`);
+  } else {
+    getMovies(`https://api.themoviedb.org/3/trending/movie/week?api_key=${API_KEY}`);
   }
-
-  const res = await fetch(\`\${BASE_URL}/search/movie?api_key=\${API_KEY}&query=\${query}\`);
-  const data = await res.json();
-
-  showMovies(data.results);
 });
-
-// Start
-loadMovies();
 </script>
 
 </body>
